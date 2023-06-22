@@ -1,0 +1,8 @@
+thread A constr
+thread B constr
+thread C constr
+AAquired Lock 1
+return from yield
+C recieved lock
+B recieved lock
+All CPUs suspended.  Exiting.

@@ -1,0 +1,56 @@
+thread A1 constr
+thread A2 constr
+thread A3 constr
+thread A4 constr
+thread A5 constr
+1 Locking
+1 Yielding
+2 Locking
+3 Locking
+4 Locking
+5 Locking
+1 return from Yield
+1 return from Lock
+2 Yielding
+2 return from Yield
+2 return from Lock
+3 Yielding
+3 return from Yield
+3 return from Lock
+4 Yielding
+4 return from Yield
+4 return from Lock
+5 Yielding
+5 return from Yield
+5 return from Lock
+
+
+thread B1 constr
+thread B2 constr
+thread B3 constr
+thread B4 constr
+thread B5 constr
+thread C0 constr
+1 Locking
+2 Locking
+3 Locking
+4 Locking
+5 Locking
+0 Aquired Lock 1
+0 Done Lock 1
+1 Yielding
+1 return from Yield
+1 return from Lock
+2 Yielding
+2 return from Yield
+2 return from Lock
+3 Yielding
+3 return from Yield
+3 return from Lock
+4 Yielding
+4 return from Yield
+4 return from Lock
+5 Yielding
+5 return from Yield
+5 return from Lock
+All CPUs suspended.  Exiting.

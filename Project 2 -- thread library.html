@@ -1,0 +1,1237 @@
+
+<!-- saved from url=(0048)https://grader4.eecs.umich.edu/eecs482/project2/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Project 2 -- thread library</title>
+<style class="anchorjs"></style><!-- These should be included at the beginning of the <head> tag. -->
+<link rel="stylesheet" href="./Project 2 -- thread library_files/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="./Project 2 -- thread library_files/primer-spec-base.css">
+<link rel="stylesheet" id="primer-spec-subtheme-style" href="./Project 2 -- thread library_files/theme_default.css"></head>
+<body class="vsc-initialized"><div id="primer-spec-top"></div>
+<!-- Custom sidebar with a table of content -->
+<!-- 
+    The explicit onClick handler is needed to force Safari (iOS) to propagate
+    click events for the sidebar.
+-->
+<div class="primer-spec-sidebar position-fixed top-0 py-5 no-print" onclick="return true;" style="display: inherit;">
+    <h2 class="primer-spec-toc-ignore" id="contents">
+        Contents
+        <!-- Show/Hide Sidebar button -->
+        <span class="primer-spec-hoverable">
+            <a href="https://grader4.eecs.umich.edu/eecs482/project2/#primer-spec-top" class="primer-spec-sidebar-toggle primer-spec-hoverable no-print sidebar-shown">
+                <i class="fas fa-bars"></i>
+            </a>
+        </span>
+    </h2>
+    <br>
+    <div id="primer-spec-toc"><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h1"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#project-2-thread-library">Project 2 -- thread library</a></div><div class="primer-spec-toc-section"><div class="primer-spec-toc-item primer-spec-toc-h2"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#overview">1. Overview</a></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h2"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#threadinterface">2. Interface to applications</a></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h2"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#threadlibrary">3. Thread library</a></div><div class="primer-spec-toc-section"><div class="primer-spec-toc-item primer-spec-toc-h3"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#init">3.1. Initializing and identifying a CPU</a></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h3"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#createswap">3.2. Creating and swapping threads</a></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h3"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#createswap">3.3. Thread lifetimes</a></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h3"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#interrupts">3.4. Interrupts</a></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h3"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#guard">3.5. cpu::guard </a></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h3"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#efficiency">3.6. Efficiency</a></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h3"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#schedulingorder">3.7. Scheduling order</a></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h3"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#error">3.8. Error handling</a></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h3"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#ucontext">3.9. Managing ucontext structs</a></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h3"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#pimpl">3.10. Opaque pointers</a></div><div class="primer-spec-toc-section"></div></div><div class="primer-spec-toc-item primer-spec-toc-h2"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#example">4. Example application</a></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h2"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#tips">5. Tips</a></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h2"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#testcases">6. Test cases</a></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h2"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#logistics">7. Project logistics</a></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h2"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#grading">8. Grading, auto-grading, and formatting</a></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h2"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#submission">9. Turning in the project</a></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h2"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#files">10. Files included in this handout (zip file)
+</a></div><div class="primer-spec-toc-section"></div><div class="primer-spec-toc-item primer-spec-toc-h2"><a href="https://grader4.eecs.umich.edu/eecs482/project2/#platforms">11. Experimental platforms</a></div><div class="primer-spec-toc-section"></div></div></div>
+</div> <!-- .primer-spec-sidebar -->
+
+<div class="primer-spec-topbar position-fixed width-full top-0 left-0 py-2 no-print">
+    <!-- Show/Hide Sidebar button -->
+    <a href="https://grader4.eecs.umich.edu/eecs482/project2/#primer-spec-top" class="primer-spec-sidebar-toggle primer-spec-sidebar-toggle-fixed primer-spec-hoverable primer-spec-float-left no-print sidebar-shown">
+        <i class="fas fa-bars"></i>
+    </a>
+    <!-- Show Settings button -->
+    <a href="https://grader4.eecs.umich.edu/eecs482/project2/#primer-spec-top" class="primer-spec-settings-toggle primer-spec-hoverable primer-spec-float-right no-print">
+        <i class="fas fa-cog"></i>
+    </a>
+</div>
+
+<!--
+    Settings modal. Treat it exactly like the actual content, but its
+    position on the page is fixed.
+    It should be displayed when the "settings" icon is clicked.
+-->
+<div class="primer-spec-settings container-lg markdown-body px-3 py-5 position-fixed top-0 left-0 primer-spec-content-margin-extra">
+    <div class="primer-spec-topbar position-fixed width-full top-0 left-0 py-2 no-print">
+        <!-- Hide Settings button -->
+        <a href="https://grader4.eecs.umich.edu/eecs482/project2/#primer-spec-top" class="primer-spec-settings-toggle primer-spec-hoverable primer-spec-float-right no-print">
+            <i class="fas fa-times"></i>
+        </a>
+    </div>
+
+    <h1 class="primer-spec-toc-ignore">Spec Theme Settings</h1>
+    <p>Choose your theme!</p>
+    <select class="primer-spec-subtheme-selector">
+    <option value="default">default</option><option value="bella">bella</option><option value="modern">modern</option><option value="xcode-dark">xcode-dark</option></select>
+
+    <hr>
+
+    <p><small>
+        Does the spec display incorrectly? <a href="https://github.com/eecs485staff/primer-spec/issues">Let us know by adding a new "issue" here.</a>
+    </small></p>
+
+    <p class="primer-spec-brand">
+        <a href="https://github.com/eecs485staff/primer-spec/" target="_blank">
+            Primer Spec v1.1.0
+        </a>
+    </p>
+
+</div>
+<div id="primer-spec-plugin-main-content" class="container-lg px-3 my-5 markdown-body primer-spec-content-margin-extra">
+<h1 id="project-2-thread-library">Project 2 -- thread library<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#project-2-thread-library" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h1>
+Worth: 15 points<br>
+Assigned: September 28, 2022<br>
+Due: October 21, 2022
+
+<h2 id="overview">1. Overview<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#overview" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h2>
+
+<p>
+This project will help you understand how threads and monitors are
+implemented.  In this project, you will implement a thread library
+similar to the one provided in
+<a href="https://grader4.eecs.umich.edu/eecs482/project1/">Project 1</a>.
+
+</p><h2 id="threadinterface">2. Interface to applications<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#threadinterface" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h2>
+
+<p>
+This section describes the interface that your thread library and the
+infrastructure provide to applications.  The interface consists of four
+classes: <tt>cpu</tt>, <tt>thread</tt>, <tt>mutex</tt>, and <tt>cv</tt> (no
+<tt>semaphore</tt>), which are declared in <a href="https://grader4.eecs.umich.edu/eecs482/project2/cpu.h"><tt>cpu.h</tt></a>, <a href="https://grader4.eecs.umich.edu/eecs482/project2/thread.h"><tt>thread.h</tt></a>, <a href="https://grader4.eecs.umich.edu/eecs482/project2/mutex.h"><tt>mutex.h</tt></a>, and <a href="https://grader4.eecs.umich.edu/eecs482/project2/cv.h"><tt>cv.h</tt></a> (<strong>do
+not modify these files</strong>).  The interface to these classes is the same as the
+one in <a href="https://grader4.eecs.umich.edu/eecs482/project1/">Project 1</a>, except for the two
+differences described below.  Because of these differences, Project 1 and 2
+use different versions of <a href="https://grader4.eecs.umich.edu/eecs482/project2/cpu.h"><tt>cpu.h</tt></a> and <a href="https://grader4.eecs.umich.edu/eecs482/project2/thread.h"><tt>thread.h</tt></a>.
+
+<!--
+<a href=libcpu.o><tt>libcpu.o</tt></a>
+-->
+
+</p><ul>
+
+<li>
+The <tt>cpu::boot</tt> function takes different parameters than in
+Project 1. These allow the program to specify the number
+of CPUs, and customize how interrupts are generated.
+
+<p>
+</p><pre>  static void boot(unsigned int num_cpus, thread_startfunc_t func, void *arg,
+                   bool async, bool sync, int random_seed);
+</pre>
+
+<p>
+The parameter <tt>num_cpus</tt> specifies the number of CPUs that this
+execution of the library should support.  <strong>Core</strong>
+projects need support only one CPU. <strong>Advanced</strong> projects
+must support multiple CPUs.
+
+</p><p>
+The parameters <tt>func</tt> and <tt>arg</tt> specify the body of the
+first thread, and the argument to pass to that body,
+respectively. When the library is simulating multiple CPUs, one CPU
+will be chosen by the infrastructure as the starting location for that
+thread's execution.
+
+</p><p>
+The three parameters <tt>sync</tt>, <tt>async</tt>,
+and <tt>random_seed</tt> control the behavior of timer interrupts.
+Timer interrupts are a per-CPU mechanism. When delivered, the OS
+should pre-empt the thread currently running on that CPU, scheduling
+the next ready thread if one exists. If no other ready thread exists, 
+the current thread should continue running without being pre-empted.
+
+</p><ul>
+<li> If <tt>sync</tt> is true, timer interrupts will be generated at
+points in the program that are synchronized to executing instructions.
+</li><li> If <tt>async</tt> is true, timer interrupts will be generated
+periodically, approximately once every millisecond.
+</li><li> The parameter <tt>random_seed</tt> controls the pattern of
+synchronous interrupts. Each value for random_seed potentially
+generates a different but repeatable pattern of interrupts. This is
+particularly helpful for re-creating a problem during testing.
+</li></ul>
+
+<p>
+Note that it is possible to enable both synchronous and asynchronous
+interrupts. The <tt>random_seed</tt> parameter only affects the
+behavior of synchronous interrupts.
+
+
+</p></li><li>
+The <tt>thread</tt> class provides an extra function
+<tt>thread::yield()</tt>.
+
+<p>
+</p><pre>    static void yield();
+</pre>
+
+A thread invokes <tt>thread::yield()</tt> to voluntarily relinquish
+its CPU to the next ready thread if one exists; it does nothign if
+there are no ready threads. This is particularly helpful in testing to
+force a particular pattern of execution amongst concurrent threads in
+the absence of interrupts. Note that <tt>thread::yield</tt> is
+a <tt>static</tt> member function and is invoked on
+the <tt>thread</tt> class, not on an instance of that class.
+</li></ul>
+
+<h2 id="threadlibrary">3. Thread library<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#threadlibrary" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h2>
+
+You will write a thread library that implements the functions in
+<a href="https://grader4.eecs.umich.edu/eecs482/project2/thread.h"><tt>thread.h</tt></a>,
+<a href="https://grader4.eecs.umich.edu/eecs482/project2/mutex.h"><tt>mutex.h</tt></a>, and <a href="https://grader4.eecs.umich.edu/eecs482/project2/cv.h"><tt>cv.h</tt></a>.
+You will also implement the <tt>cpu::init</tt> function, which is called by
+the infrastructure when it starts a CPU.
+
+<h3 id="init">3.1. Initializing and identifying a CPU<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#init" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h3>
+
+<p>
+Your thread library will provide the implementation
+of <tt>cpu::init</tt>.  This is the only member of the <tt>cpu</tt>
+class that your library implements. 
+
+</p><p>
+When <tt>cpu::boot</tt> is called, the infrastructure instantiates
+<tt>num_cpus</tt> objects of type <tt>cpu</tt> and invokes
+the <tt>init</tt> method on each:
+
+</p><p>
+</p><pre>void init(thread_startfunc_t body, void *arg);
+</pre>
+
+One of those invocations will be passed the <tt>body</tt>
+and <tt>arg</tt> parameters that were passed
+to <tt>cpu::boot</tt>. The others will be invoked
+with <tt>nullptr</tt> for both <tt>body</tt>
+and <tt>arg</tt>. <tt>cpu::init</tt> should cause this CPU to run
+threads as they become available. Additionally, the invocation with a
+non-<tt>NULL</tt> body and arg should create a thread that
+executes <tt>body(arg)</tt>. You may not assume any particular order
+in which these invocations happen.
+
+<p>
+</p><p>
+<tt>cpu::init</tt> does not return. If it fails, it should throw an
+appropriate exception, e.g., <tt>std::bad_alloc</tt> if it can't
+allocate memory.
+
+</p><p>
+Your thread library may find it helpful to identify the "current"
+CPU. The function <tt>cpu::self</tt> returns a pointer to the
+<tt>cpu</tt> object for the CPU executing the calling thread.
+Note that <tt>cpu::self</tt> is a <tt>static</tt> member function and is
+invoked on the <tt>cpu</tt> class, not an instance of that class.
+
+</p><h3 id="createswap">3.2. Creating and swapping threads<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#createswap" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h3>
+
+<p>
+You will be implementing your thread library on x86 PCs running the
+Linux operating system.  Linux provides three functions
+in <tt>ucontext.h</tt> to help implement user-level thread
+libraries: <tt>makecontext</tt>, <tt>setcontext</tt>,
+and <tt>swapcontext</tt>. <strong>Note:</strong> our infrastructure
+provides wrappers to the standard implementations of these to simplify
+some things for you.
+
+</p><ul>
+<p>
+</p><li>The <tt>ucontext_t</tt> structure is capable of representing the state
+of a paused or blocked thread.
+
+<p>
+</p></li><li><tt>makecontext</tt> initializes a new thread context.  
+<p>
+</p><pre>void makecontext(ucontext_t *ucp, void (*func)(), int argc, ...);
+</pre>
+The parameter <tt>ucp</tt> must point to an allocated object of
+type <tt>ucontext_t</tt>. The parameter <tt>func</tt> is a pointer to
+the body that this context should begin executing when it is made
+active. <tt>argc</tt> specifies how many arguments <tt>body</tt> is
+expecting, followed by that list of zero or more arguments.
+
+<p>
+Here is some example code which shows how to initialize a thread
+context to represent a new thread. This new thread will use a
+newly-created stack, and will begin executing a function
+called <tt>start</tt> that expects three
+arguments, <tt>arg1</tt>, <tt>arg2</tt>, and <tt>arg3</tt>.
+
+<!--
+#include &lt;ucontext.h&gt;
+
+/*
+ * Initialize a context structure by copying the current thread's context.
+ */
+getcontext(ucontext_ptr);           // ucontext_ptr has type (ucontext_t *)
+-->
+
+</p><hr>
+<pre>
+/*
+ * Direct the new thread to use an allocated stack.  Your thread library
+ * should allocate but not initialize STACK_SIZE bytes for each thread's
+ * stack.
+ */
+char *stack = new char [STACK_SIZE];
+ucontext_ptr-&gt;uc_stack.ss_sp = stack;
+ucontext_ptr-&gt;uc_stack.ss_size = STACK_SIZE;
+ucontext_ptr-&gt;uc_stack.ss_flags = 0;
+ucontext_ptr-&gt;uc_link = nullptr;
+
+/*
+ * Set up the new thread to start by calling start(arg1, arg2, arg3).
+ */
+makecontext(ucontext_ptr, (void (*)()) start, 3, arg1, arg2, arg3);
+</pre>
+<hr>
+
+<p>
+Note that the manual page for <tt>makecontext</tt> specifies that the
+arguments to the thread body should be integers for
+portability. However, it is safe for them to be pointers on our
+infrastructure. The manual page also specifies that <tt>ucp</tt> must
+be initialized with <tt>getcontext</tt>; that too is unnecessary in
+our infrastructure. The wrapper we provide for this routine takes
+care of both of these for you.
+
+</p><p>
+<strong>Hint</strong>: resist the urge to assign a non-null value
+to <tt>uc_link</tt>. It does not solve the problem you think it will
+solve. Solve that problem some other way.
+
+</p><p>
+</p></li><li><tt>swapcontext</tt> saves the current context and switches to another. 
+<p>
+</p><pre>int swapcontext(ucontext_t *oucp, const ucontext_t *ucp);
+</pre>
+<p>
+<tt>swapcontext</tt> saves the current CPU registers to the context
+structure pointed to by <tt>oucp</tt>, and loads the saved CPU
+registers from the context structure pointed to by <tt>ucp</tt>.  This
+effectively pauses the running thread and makes the second context the
+active thread on this processor. The context in <tt>ucp</tt> must have
+previously been saved (via <tt>swapcontext</tt>) or constructed
+(via <tt>makecontext</tt>). This function does not return immediately,
+but may appear to return if and when the saved context
+in <tt>oucp</tt> is later activated.
+
+</p><p>
+</p></li><li><tt>setcontext</tt> switches to the context of another thread.
+<p>
+</p><pre>int setcontext(const ucontexzt_t *ucp);
+</pre>
+<p>
+<tt>setcontext</tt> restores the context structure pointed to
+by <tt>ucp</tt> to the CPU registers, effectively switching to that
+context. The context must have previously been saved
+(via <tt>swapcontext</tt>) or constructed
+(via <tt>makecontext</tt>). Unlike <tt>swapcontext</tt>, <tt>setcontext</tt>
+does not save the current running context. 
+
+</p><p>
+  </p></li><li>The <tt>ucontext</tt> facility provides one additional function:
+    <tt>getcontext</tt> saves the context of the current thread.
+<p>
+</p><pre>int getcontext(ucontext_t *ucp);
+</pre>
+It copies the current CPU registers to the context structure pointed
+to by <tt>ucp</tt>, which must point to an allocated object of
+type <tt>ucontext_t</tt>. <strong>Hint</strong>: This function is not
+particularly useful.  To see why, think about what happens to the
+program counter of the current thread after it
+calls <tt>getcontext</tt>.
+
+</li></ul>
+
+<h3 id="createswap">3.3. Thread lifetimes<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#createswap" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h3>
+
+<p>
+A <em>thread object</em> is the data structure (of
+type <tt>thread</tt>) that represents a thread in an application
+program.  When a thread object is instantiated, it creates a corresponding
+<em>stream of execution</em> that comprises the running thread. The
+one exception to this is the stream of execution representing the
+thread created by the call to <tt>cpu::boot</tt>. That thread has no
+corresponding application-visible thread object, and its stream of
+execution should begin running once its CPU is initialized. Any other
+stream of execution is made ready when its corresponding thread object
+is instantiated; it may begin running upon instantiation or anytime
+thereafter, depending on the current workload and
+(for <strong>Advanced</strong> projects) number of available CPUs.
+
+</p><p>
+A stream of execution completes when the thread returns from the
+function that was specified as the thread's body. Soon after the
+stream of execution completes, the thread library should deallocate
+the memory used for the thread's stack and TCB.
+
+</p><p>
+A thread object is destroyed according to the normal rules of object
+destruction: through explicit deallocation (if dynamic) or when the
+thread object goes out of scope (if static).  The thread object may be
+destroyed <strong>before or after</strong> the stream of execution
+completes, and the destruction of the thread object should not affect
+the stream of execution (or vice versa).
+
+</p><p>
+If the thread object is destroyed before the stream of execution
+completes, that stream of execution should continue. If the stream of
+execution completes before the thread object is destroyed, the memory
+used for the thread's stack and TCB should be deallocated, but the
+thread object should still be valid. For example, another thread in the
+application might still <tt>join</tt> with the (now completed) thread.
+
+
+<!--
+The thread
+object for the thread created by <tt>cpu::init</tt> should never be destroyed.
+-->
+
+<!--
+<p>
+Second, think about when the constructor for a thread, mutex, or condition
+variable may be called.  Threads are <em>not</em> allowed to be constructed
+before the system is initialized (i.e., before <tt>cpu::boot</tt> has been
+called).  However, mutexes and condition variables <em>are</em> allowed to
+be constructed before <tt>cpu::boot</tt> is called (they are often global
+variables, which are constructed before <tt>main</tt> is called; see
+<a href=#example>Section 4</a> for an example).  This implies that the
+constructors for mutexes and condition variables must not depend on any
+cpu or thread library data.  In particular, they should not need to
+manipulate interrupts.  You may assume that <tt>new</tt> is thread
+safe.
+-->
+
+</p><h3 id="interrupts">3.4. Interrupts<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#interrupts" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h3>
+
+<p>
+The infrastructure we provide supports the use of interrupts.  To help
+ensure atomicity of multiple operations, your thread library will
+manipulate interrupts using functions provided by the <tt>cpu</tt>
+class. <strong>Advanced</strong> projects will additionally use these
+routines to help manage multiple CPUs efficiently.
+
+</p><p>
+The infrastructure provides two types of interrupts: 
+<em>timer interrupts</em> and <em>inter-processor interrupts</em>
+(IPI).  Timer interrupts are generated periodically by the
+infrastructure, provided they were enabled
+by <tt>cpu::boot</tt>. Inter-processor interrupts are received by one
+CPU when another CPU calls
+<tt>cpu::interrupt_send</tt>.  <strong>Core/Advanced</strong>: Core
+thread libraries must handle timer interrupts. Only Advanced thread
+libraries need to consider IPIs. 
+
+</p><p>
+Interrupts can only be received when interrupts are enabled. When a
+CPU receives an interrupt, the infrastructure consults the
+<tt>cpu::interrupt_vector_table</tt> for that CPU and calls the interrupt
+handler that is registered for that type of interrupt.  The interrupt
+handler begins running with interrupts (still) enabled.  At the
+time <tt>cpu::init</tt> is called, interrupts are disabled.  
+
+</p><p>
+Your thread library is responsible for setting the required entries in
+the interrupt vector
+table.  <tt>cpu::interrupt_vector_table[TYPE]</tt> specifies the
+address of the function to call when the specified CPU receives
+interrupt
+<tt>TYPE</tt> (<tt>TYPE</tt> can be <tt>cpu::TIMER</tt> or
+<tt>cpu::IPI</tt>).
+
+</p><ul>
+<li><tt>cpu::interrupt_disable</tt> 
+<p>
+</p><pre>static void interrupt_disable();
+</pre>
+<p>
+<tt>cpu::interrupt_disable</tt> atomically disables interrupts on the
+CPU executing the invoking thread. This is a static member function.
+
+</p></li><li><tt>cpu::interrupt_enable</tt> 
+<p>
+</p><pre>static void interrupt_enable();
+</pre>
+<p>
+<tt>cpu::interrupt_enable</tt> atomically enables interrupts on the
+CPU executing the invoking thread. This is a static member
+function. Recall that disable/enable pairs cannot be nested; a single
+call to <tt>enable</tt> enables interrupts no matter how many
+preceding calls to <tt>disable</tt> have been made.
+
+</p></li><li><tt>cpu::interrupt_enable_suspend</tt>
+<p>
+</p><pre>static void interrupt_enable_suspend();
+</pre>
+<p>
+<tt>cpu::interrupt_enable_suspend</tt> atomically (1) enables
+interrupts on the CPU executing the calling thread and (2) suspends
+that CPU until it receives an inter-processor interupt (IPI) from
+another CPU. This is a static member function.
+
+</p></li><li><tt>cpu::interrupt_send()</tt>
+<p>
+</p><pre>void interrupt_send();
+</pre>
+<p>
+<tt>cpu::interrupt_send</tt> posts an inter-processor interrupt to the
+CPU object on which this method is invoked.
+</p></li></ul>
+
+<p>
+Remember that interrupts should be disabled only when executing in
+your thread library's code.  The code outside your thread library
+should <strong>never</strong> execute with interrupts disabled.
+
+
+
+</p><h3 id="guard">3.5. <tt>cpu::guard</tt> <a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#guard" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h3>
+
+<p>
+<strong>Advanced</strong>. The infrastructure provides a single guard
+variable (<tt>cpu::guard</tt>) that your thread library must use to
+provide mutual exclusion on multiprocessors.  Remember that the switch
+invariant for multiprocessors specifies that <tt>cpu::guard</tt> must
+be <tt>true</tt> when calling
+<tt>swapcontext</tt> or <tt>setcontext</tt>, and must be set to false
+after resuming from a stored context but before returning to user
+code.  <tt>cpu::guard</tt> is initialized to <tt>false</tt>.
+
+</p><p>
+You may use any of the functions in
+<a href="http://en.cppreference.com/w/cpp/atomic/atomic"><tt>std::atomic</tt></a>
+to manipulate <tt>cpu::guard</tt>. <strong>Hint</strong>: You are
+likely to find <tt>store</tt> and <tt>exchange</tt> most useful.
+Beware of using the <tt>load</tt> function--it usually leads to a race
+condition.
+
+</p><h3 id="efficiency">3.6. Efficiency<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#efficiency" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h3>
+
+<p>
+Your thread library should manage the CPUs
+efficiently.  Minimize the number of calls to <tt>swapcontext</tt>
+and <tt>setcontext</tt>, and minimize busy waiting (though some busy
+waiting in the thread library is inevitable when running on a
+multiprocessor).  Suspend a CPU (using
+<tt>cpu::interrupt_enable_suspend</tt>) when there are no runnable threads.
+
+</p><p>
+When all CPUs are suspended, the infrastructure will exit the process
+with the message:
+
+</p><pre>All CPUs suspended.  Exiting.
+</pre>
+
+<h3 id="schedulingorder">3.7. Scheduling order<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#schedulingorder" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h3>
+
+<p>
+This section describes the specific scheduling order that your thread
+library should follow.  Note that the thread library provided in
+<a href="https://grader4.eecs.umich.edu/eecs482/project1/">Project 1</a> does not guarantee this
+scheduling order, since that thread library was provided for
+developing concurrent programs; for a concurrent program to be
+considered correct, it must work for any scheduling order.
+
+</p><p>
+All scheduling queues should be FIFO.  This includes the ready queue,
+the queue of threads waiting for a mutex, the queue of threads waiting
+on a condition variable, and the queue of threads waiting for a thread
+to exit.  All CPUs should share a single ready queue.  Mutexes should
+be acquired by threads in the order in which the mutex was requested
+(by <tt>mutex::lock</tt> or in
+<tt>cv::wait</tt>). <strong>Note</strong> that this requires 
+<em>handoff locks</em>, where an unlocking thread grants the lock to
+the first waiting thread, if there is one. Be sure to use the right
+algorithm from lecture!
+
+</p><p>
+A thread does not yield its CPU when: creating a thread, unlocking a
+mutex, or calling signal/broadcast on a condition variable.  The
+created or unblocked thread(s) should be put on the ready queue. Each
+thread on the ready queue should be executed when (a) a CPU becomes
+available and (b) it is at the head of the queue.
+
+</p><p>
+When a thread wakes up in <tt>cv::wait</tt>, it is that thread's
+responsibility to request the mutex when it next runs.
+
+</p><p>
+Your implementation of <tt>cv::wait</tt> should not experience any
+spurious wakeups.
+
+</p><h3 id="error">3.8. Error handling<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#error" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h3>
+
+<p>
+Operating system code should be robust to bad user programs.  These fall
+into four categories:
+
+</p><ul>
+
+<li> <strong>Questionable style.</strong>
+A user program may not be written in the style we recommend for concurrent
+programs, but it may still lie within the bounds of how a program is
+allowed to use the thread library without causing an exception.  Here are a
+few examples; none of these should be considered an error for Project 2.
+
+    <ul>
+    <li> Calling <tt>thread::yield</tt>.
+    </li><li> Signaling without holding the mutex (some may not even consider
+	this poor style).
+    </li><li> Deadlock.  Even trivial deadlocks are legal, such as a thread trying
+        to acquire a mutex it has already locked, or a thread trying to
+	<tt>join</tt> with itself.
+    </li><li> Calling <tt>cv::wait</tt> without checking a condition in a
+	<tt>while</tt> loop.
+    </li><li> Calling <tt>cv::wait</tt> on one cv with different mutexes.
+    </li><li> A thread that exits while holding a mutex (the mutex stays
+        locked).
+    </li></ul>
+	
+<!--
+Ask on the forum if you're unsure whether you should consider a certain
+behavior an error.
+-->
+
+</li><li> <strong>Misuse of thread functions</strong> A user program may
+attempt to use a thread function in a way that is explicitly
+disallowed.  In particular, a thread may try to release a mutex it is
+not holding.  Your thread library should detect such misuses and throw
+a <tt>std::runtime_error</tt> exception.
+
+</li><li> <strong>Resource exhaustion</strong>.  The process may exhaust a
+resource needed by the OS.  In this project, the main resource used by
+the OS is memory.  If the thread library is unable to service a request due
+to lack of memory, it should throw a <tt>std::bad_alloc</tt> exception.
+<!--
+Applications can then catch the exception and proceed accordingly.
+-->
+
+</li><li> <strong>Undefined behavior</strong>
+Some programming errors cause undefined behavior in C++, e.g.,
+using uninitialized variables or pointers to free memory.  Examples
+in this project include creating a thread with a bad function pointer
+(e.g., <tt>nullptr</tt>) and destroying a thread object while it is still in
+use by <tt>thread::join</tt>.  Your thread library may behave arbitrarily
+for such errors. In other words, you need not worry about them.
+
+</li></ul>
+
+<p>
+All programs with well-defined behavior (i.e., all but the last category in
+the list above) can and should be used when testing your thread library,
+and your thread library should produce well-defined results for them.
+
+</p><p>
+The other source of errors are bugs in the OS code itself (in this case,
+your thread library).  While developing the OS, the best behavior in this
+case is for the OS to detect the bug quickly and assert (this is called a
+<em>panic</em> in kernel parlance).  These error checks are essential
+in debugging concurrent programs, because they help flag error
+conditions early.  <strong>Use assertion statements copiously in your
+thread library to check for bugs in your code (for reference, 1/8 of
+the lines of code in the solution thread library are devoted to
+assertions).</strong>
+
+
+</p><p>
+To make it easier for you to check for errors related to interrupts, the
+infrastructure provides two functions, <tt>assert_interrupts_disabled</tt>
+and <tt>assert_interrupts_enabled</tt> that your thread library can call to
+check that the status of interrupts is as you expect.
+
+<!--
+<p>
+We will not provide you with an exhaustive list of errors that you should
+catch.  OS programmers must have a healthy (?) sense of paranoia to make their
+system robust, so part of this assignment is thinking of and handling lots of
+errors.  Unfortunately, there will be some errors that are not possible to
+handle, because the thread library shares the address space with the user
+program and can thus be corrupted by the user program.
+-->
+
+</p><p>
+Hint: Autograder test cases 19-21 check how well your thread library
+handles errors.
+
+</p><h3 id="ucontext">3.9. Managing <tt>ucontext</tt> structs<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#ucontext" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h3>
+
+<p>
+Do not initialize a <tt>ucontext</tt> struct by copying another
+<tt>ucontext</tt> struct.  Always initialize a <tt>ucontext</tt> struct through
+<!--
+<tt>getcontext</tt>/
+-->
+<tt>makecontext</tt>*.
+Allocate <tt>ucontext</tt> structs dynamically (e.g., via <tt>new</tt>) and
+manage them by passing or storing pointers to the <tt>ucontext</tt> struct,
+or by passing/storing pointers to structs that contain a <tt>ucontext</tt>
+struct.  Pointers allow the original <tt>ucontext</tt> struct to never be
+copied.
+
+<!--
+(or by passing/storing pointers to structs that contain a pointer to a
+<tt>ucontext</tt> struct, but this is overkill).
+-->
+
+</p><p>
+Why is it a bad idea to copy a <tt>ucontext</tt> struct?  The reason is
+that you don't know what's in a <tt>ucontext</tt> struct.  Byte-for-byte
+copying (e.g., using <tt>memcpy</tt>) can lead to errors unless you know
+what's in the struct you're copying.  In particular, a <tt>ucontext</tt>
+struct happens to contain a pointer to one of its data members.  If you
+copy a <tt>ucontext</tt> using <tt>memcpy</tt>, you will copy the value of
+this pointer, and the new copy will point to the <strong>old</strong>
+copy's data member.  If you later deallocate the old copy (e.g., if it was
+a local variable), then the new copy will point to garbage. 
+
+</p><p>
+Unfortunately, it is rather easy to accidentally copy <tt>ucontext</tt> structs.
+Some of the common ways are:
+</p><ul>
+<li>passing a <tt>ucontext</tt> by value into a function
+</li><li>copying the <tt>ucontext</tt> struct into an STL queue
+</li><li>declaring a local <tt>ucontext</tt> variable is almost always a bad idea, since
+it practically forces you to copy it.
+</li></ul>
+
+<p>
+For the same reason, moving a <tt>ucontext</tt> struct in memory is also
+dangerous.  If you use an STL class to allocate a <tt>ucontext</tt> struct,
+make sure that STL class doesn't move its objects around in memory.  E.g.,
+using vector to allocate <tt>ucontext</tt> structs is a bad idea, because
+vectors will move memory around when they resize.
+
+</p><p>
+*: <strong>Hint (Advanced)</strong>: For multiprocessor thread
+libraries, there are some meaningful contexts that begin running
+before your library has a chance to create any. To see why, think
+about how <tt>cpu::init</tt> is called for each CPU.
+
+</p><h3 id="pimpl">3.10. Opaque pointers<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#pimpl" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h3>
+
+<p>
+You may not modify or rename the header files included in this handout.
+However, you will probably need to add data and functions for the
+classes declared in the headers (<tt>cpu</tt>, <tt>thread</tt>,
+<tt>mutex</tt>, <tt>cv</tt>).  We use the <em>opaque pointer</em> idiom
+(sometimes called <em>pimpl</em>, for "pointer to implementation") to allow
+you to add data/functions for a class without changing that class's header
+file (or recompiling <tt>libcpu.o</tt>).
+
+</p><p>
+The <tt>cpu</tt>, <tt>thread</tt>, <tt>mutex</tt>, <tt>cv</tt> classes each
+provide an <tt>impl_ptr</tt> member, which points to an instance of class
+<tt>impl</tt>.  For example, class <tt>thread</tt> provides
+<tt>thread::impl_ptr</tt>, which points to an instance of
+class <tt>thread::impl</tt>.
+
+</p><p>
+You may define each <tt>impl</tt> class and use each <tt>impl_ptr</tt>
+however you like.  For example, you can store custom data and
+functions you need for a <tt>mutex</tt> in an instance of
+the <tt>mutex::impl</tt> class, then point to this instance via
+a mutex's <tt>impl_ptr</tt>.
+
+</p><p>
+Typically, a class constructor will allocate the <tt>impl</tt> object and
+initialize the <tt>impl_ptr</tt> to point to the allocated data.
+For the <tt>cpu</tt> class, do these tasks in <tt>cpu::init</tt>,
+since you're not writing the <tt>cpu</tt> class constructor.
+
+</p><h2 id="example">4. Example application<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#example" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h2>
+
+<p>
+Here is a short program that uses the above thread library, along with the
+output generated by the program.  Make sure you understand how the CPU is
+switching between two threads while they're executing the <tt>loop</tt>
+function.  <tt>i</tt> is on the stack and so is private to each thread.
+<tt>g</tt> is a global variable and so is shared among the two threads.
+
+</p><hr>
+<pre>#include &lt;iostream&gt;
+#include &lt;cstdlib&gt;
+#include "thread.h"
+
+using std::cout;
+using std::endl;
+
+int g = 0;
+
+mutex mutex1;
+cv cv1;
+
+void loop(void *a)
+{
+    char *id = (char *) a;
+    int i;
+
+    mutex1.lock();
+    cout &lt;&lt; "loop called with id " &lt;&lt; id &lt;&lt; endl;
+
+    for (i=0; i&lt;5; i++, g++) {
+	cout &lt;&lt; id &lt;&lt; ":\t" &lt;&lt; i &lt;&lt; "\t" &lt;&lt; g &lt;&lt; endl;
+        mutex1.unlock();
+	thread::yield();
+        mutex1.lock();
+    }
+    cout &lt;&lt; id &lt;&lt; ":\t" &lt;&lt; i &lt;&lt; "\t" &lt;&lt; g &lt;&lt; endl;
+    mutex1.unlock();
+}
+
+void parent(void *a)
+{
+    intptr_t arg = (intptr_t) a;
+
+    mutex1.lock();
+    cout &lt;&lt; "parent called with arg " &lt;&lt; arg &lt;&lt; endl;
+    mutex1.unlock();
+
+    thread t1 ( (thread_startfunc_t) loop, (void *) "child thread");
+
+    loop( (void *) "parent thread");
+}
+
+int main()
+{
+    cpu::boot(1, (thread_startfunc_t) parent, (void *) 100, false, false, 0);
+}
+
+<hr>
+parent called with arg 100
+loop called with id parent thread
+parent thread:	0	0
+loop called with id child thread
+child thread:	0	0
+parent thread:	1	1
+child thread:	1	2
+parent thread:	2	3
+child thread:	2	4
+parent thread:	3	5
+child thread:	3	6
+parent thread:	4	7
+child thread:	4	8
+parent thread:	5	9
+child thread:	5	10
+All CPUs suspended.  Exiting.
+</pre>
+<hr>
+
+<h2 id="tips">5. Tips<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#tips" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h2>
+
+<p>
+Start by implementing <tt>cpu::init</tt>, <tt>thread::thread</tt>, and
+<tt>thread::yield</tt>.  Don't worry at first about atomicity in the
+thread library or supporting multiple processors, but you must ensure
+that interrupts are enabled whenever user code is running. After you
+get that system working, implement the other thread library functions.
+
+</p><p>
+<strong>Hint:</strong> Remember that switching between threads must
+always be mediated by OS code--namely, something you write in your
+thread library. This is true for any switch, whether it happens within
+a thread, after a thread ends, or even before it begins. As discussed
+in lecture, this has particular implications for how threads are
+created.
+
+
+</p><p>
+Next, add calls to <tt>cpu::interrupt_disable</tt> and
+<tt>cpu::interrupt_enable</tt> to ensure your library works in the
+presence of interrupts.  You'll need to think about what should happen
+when an interrupt occurs and how to guarantee atomicity in your thread
+library when they occur.  Finally, <strong>advanced</strong> projects
+should add support for multiple processors.  Use
+<tt>cpu::guard</tt> to ensure atomicity for multiprocessors, and think
+about what a CPU should do when there are no runnable threads.
+
+</p><p>
+<strong>Hint (advanced):</strong> Think carefully about how to put a
+processor to sleep. In particular, think about why it cannot be done
+directly by the thread context that is ending/blocking.
+The <strong>hint</strong> at the end of
+<a href="https://grader4.eecs.umich.edu/eecs482/project2/#ucontext">Section 3.9</a> is relevant to solving this
+problem.
+
+</p><p>
+For full credit, you should use RAII to manage interrupts and,
+for <strong>advanced</strong> projects, the guard. As discussed in
+lecture, the RAII model is particularly helpful when functions might
+terminate either via normal return or thrown exceptions.  Note that
+there may be some places where you have to reach inside the RAII
+abstraction and manipulate interrupts or the guard directly; you might
+even want to build such facilities into your wrapper.
+
+</p><p>
+We recommend the use of managed pointers for this project. This will
+require a bit more investment on your part, but we believe this
+investment will be repaid in fewer/easier to find bugs. 
+
+</p><h2 id="testcases">6. Test cases<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#testcases" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h2>
+
+<p>
+An integral (and graded) part of writing your thread library will be to write a
+suite of test cases to validate any thread library.  This is common practice in
+the real world--software companies maintain a suite of test cases for their
+programs and use this suite to check the program's correctness after a change.
+Writing a comprehensive suite of test cases will deepen your understanding of
+how to use and implement threads, and it will help you a lot as you debug your
+thread library.
+
+</p><p>
+Each test case for the thread library will be a short C++ program that uses
+functions in the thread library (e.g., the example program in <a href="https://grader4.eecs.umich.edu/eecs482/project2/#example">Section 4</a>).  The name of each test case should start
+with <tt>test</tt> and end with <tt>.cc</tt> or <tt>.cpp</tt>, e.g.,
+<tt>test1.cpp</tt>.
+
+</p><p>
+Each test case should be run without any arguments and should not use any
+input files.  Test cases should exit(0) when run with a correct thread
+library (normally this will happen when your test case's last runnable
+thread ends or blocks).
+<!--
+If you submit your disk scheduler as a test case,
+remember to adapt its call to <tt>cpu::boot</tt> and to
+specify all inputs (number of requesters, buffers, and the list
+of requests) statically in the program.  The list of requests should be
+short to make a good test case (i.e., one that you can trace through what
+should happen).
+-->
+
+</p><p>
+The test cases you submit should call <tt>cpu::boot</tt> with
+<tt>num_cpus=1</tt> and without enabling asynchronous or synchronous
+timer interrupts.  All the instructor's buggy thread libraries can be
+exposed with a single CPU and without timer
+interrupts. <strong>Note:</strong> one consequence of this is that a
+"complete" test suite cannot be used to verify that your own library
+is correct, at least because it cannot use interrupts.
+
+</p><p>
+Your test suite may contain up to 22 test cases.  Each test case must
+generate less than 1 MB of output, use less than 100 MB of memory, and
+take less than 60 seconds to run.  These limits are much larger than needed
+for full credit.  You will submit your suite of test cases together with
+your thread library, and we will grade your test suite according to how
+thoroughly it exercises a thread library.  <a href="https://grader4.eecs.umich.edu/eecs482/project2/#grading">Section 9</a>
+describes how your test suite will be graded.
+
+</p><p>
+When writing test cases for submission, think carefully about how to
+exercise the various parts of your thread library that are not related
+to either interrupts or multiple CPUs. For <strong>expected</strong>
+test cases, you will want to exercise simple operations with monitors:
+thread creation and destruction, threads yielding to one another,
+contending for locks in critical sections, and using condition
+variables for happens-before constraints. For <strong>edge</strong>
+test cases, look especialy at the first three categories
+of <a href="https://grader4.eecs.umich.edu/eecs482/project2/#error">Section 3.8</a>, which gives a partial list of
+interesting edge cases. For each of these cases, write down what you
+think the correct answer <em>should</em> be, and then see if your
+thread library matches your expectation.
+
+</p><p>
+The autograder is able to (and will) use both synchronous and
+asynchronous interrupts in testing <em>your</em> solution. Therefore
+you should write and run such test cases yourself, even though you
+can't submit them. <strong>Expected</strong> test cases might include
+a set of threads with long runtimes that don't voluntarily yield the
+CPU. Have these be concise enough that you should know what
+an <em>incorrect</em> execution might look like. You should also
+employ <strong>stress</strong> tests that have many threads running
+for long periods of time, perhaps exercising many of the thread
+facilities to give you confidence that your implementation is
+correct. <strong>Hint</strong>: It is very hard to test all possible
+combinations of thread library code and interrupts. You
+should <em>also</em> inspect your individual routines to make sure
+they are obeying the switch invariant. <strong>Hint:</strong> When
+reading your library routines, imagine what happens if an interrupt is
+delivered <em>immediately before</em>
+calling <tt>interrupt_disable()</tt> and <em>immediately after</em>
+returning from <tt>interrupt_enable</tt> or
+(for <strong>advanced</strong>
+projects) <tt>interrupt_enable_suspend</tt>.
+
+</p><p>
+There are some test cases that your submission <strong>cannot</strong>
+pass unless it has passed some earlier test case(s). In those cases,
+the line number on which your submission is reported as failing is
+even less informative than it might otherwise be. Therefore, resist
+trying to infer what the bug is by the reported line number at which
+you are failing.
+
+For <strong>advanced</strong> libraries, the autograder is able to
+(and will) use multiple CPUs.  Therefore, you should write and run
+such test cases yourself. <strong>Expected</strong> test cases might
+include a set of threads that grows and shrinks over
+time. <strong>Stress</strong> tests are probably even more important
+for <strong>advanced</strong> libraries. Likewise it is probalby even
+more importnat to consider interrupts immediately before a call
+to <tt>interrupt_disable</tt> and immediately after a call to
+either <tt>interrupt_enable</tt> or <tt>interrupt_enable_suspend</tt>.
+
+
+
+</p><h2 id="logistics">7. Project logistics<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#logistics" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h2>
+
+<p>
+Write your thread library in C++17 on Linux.  Use the default CAEN
+compiler (with -std=c++17) to compile your programs. As of this
+writing, the default version is 8.5.0, on RHEL 8. This is also the
+compiler and OS version used by the autograder, but we cannot
+guarantee identical behavior for thread libraries containing code with
+undefined meaning.
+
+<!--To use g++ 9.1.0
+on CAEN computers, put the following command in your startup file
+(e.g., <tt>~/.profile</tt>):
+
+<pre>
+module load gcc/9.1.0
+</pre>
+-->
+
+<!--
+<p>
+You should also set the <tt>LD_BIND_NOW</tt> environment variable to 1.
+This works around an apparent incompatibility between the thread library
+and the Linux dynamic linker.  Add the following line to your 
+<tt>~/.profile</tt>:
+
+<pre>
+export LD_BIND_NOW=1
+</pre>
+-->
+
+</p><p>
+You may use any functions included in the standard C++ library, except the
+C++ thread facilities.  You should not use any libraries other than the
+standard C++ library.  Your thread library code may be in multiple files.
+Each file name must end with <tt>.cc</tt>, <tt>.cpp</tt>, or <tt>.h</tt>
+and must not start with <tt>test</tt>.
+
+</p><p>
+To avoid conflicting with the C++ thread facilities, do not specify
+"using namespace std;" in your program.
+
+</p><p>
+This <a href="https://grader4.eecs.umich.edu/eecs482/project2/Makefile">Makefile</a> shows how to compile your thread library
+and an application that uses the thread library (adjust the file names in
+the Makefile to match your own program).
+
+</p><p>
+You are required to document your development process by having your
+Makefile run <tt><a href="https://grader4.eecs.umich.edu/eecs482/project2/autotag.sh">autotag.sh</a></tt> each time it
+compiles your thread library (see Makefile above).
+<tt><a href="https://grader4.eecs.umich.edu/eecs482/project2/autotag.sh">autotag.sh</a></tt> creates a git tag for a
+compilation; which helps the instructors better understand your development
+process.  <tt><a href="https://grader4.eecs.umich.edu/eecs482/project2/autotag.sh">autotag.sh</a></tt> also configures your
+local git repo to include these tags when you run "<tt>git push</tt>".  To
+use it, download <tt><a href="https://grader4.eecs.umich.edu/eecs482/project2/autotag.sh">autotag.sh</a></tt> and set its
+execute permission bit (run "<tt>chmod +x autotag.sh</tt>").  If you have
+several local git repos, be sure to push to github from the same repo in
+which you compiled your thread library.
+
+</p><p>
+When running <tt>gdb</tt>, you will probably find it useful to direct
+<tt>gdb</tt> to ignore <tt>SIGUSR1</tt> events (used by the project
+infrastructure).  To do this, use the following command in <tt>gdb</tt>:
+</p><pre>handle SIGUSR1 nostop noprint
+</pre>
+
+<p>
+The infrastructure simulates multiple CPUs as multiple POSIX threads.
+You can view and switch among these simulated CPUs via the following commands:
+</p><pre>info threads
+thread &lt;N&gt;          (Note: &lt;N&gt; is the ID of the thread you want to view in gdb.  Thread ID 1 is used by the infrastructure.)
+</pre>
+
+<p>
+Debugging print statements made by the thread library when interrupts are
+disabled should use <tt>printf</tt>, not <tt>cout</tt>.  This avoids
+deadlocking with user code (which should use <tt>cout</tt>).
+
+</p><p>
+We have created a private <a href="https://github.com/eecs482">github</a>
+repository for your group
+(<tt>eecs482/&lt;group&gt;.2</tt>), where <tt>&lt;group&gt;</tt> is
+the sorted, dot-separated list of your group members' uniqnames.  Initialize
+your local repository by cloning the (empty) repository from github, e.g.,
+
+</p><pre>git clone git@github.com:eecs482/uniqnameA.uniqnameB.2
+</pre>
+
+<h2 id="grading">8. Grading, auto-grading, and formatting<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#grading" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h2>
+
+<p>
+To help you validate your programs, your submissions will be graded
+automatically, and the results will be provided to you.  You may then
+continue to work on the project and re-submit.  The results from the
+auto-grader will not be very illuminating; they won't tell you where your
+problem is or give you the test programs.  The main purpose of the
+auto-grader is to help you know to keep working on your project (rather
+than thinking it's perfect and ending up with a 0).  The best way to debug
+your program is to generate your own test cases, figure out the correct
+answers, and compare your program's output to the correct answers.  This is
+also one of the best ways to learn the concepts in the project.
+
+</p><p>
+The student suite of test cases will be graded according to how
+thoroughly they test a thread library using a single CPU and no
+interrupts.  We will judge thoroughness of the test suite by how well
+it exposes potential bugs.  The auto-grader will first compile a test
+case with a correct thread library and generate the correct output
+(on <tt>stdout</tt>, i.e., the stream used by
+<tt>cout</tt>) for this test case.  Test cases should not cause any compile
+or run-time errors when compiled with a correct thread library.  The
+auto-grader will then compile the test case with a set of buggy thread
+libraries.  A test case exposes a buggy thread library by causing it to
+generate output (on <tt>stdout</tt>) that differs from the correct output.
+The test suite is graded based on how many of the buggy thread libraries
+were exposed by at least one test case.  This is known as <em>mutation
+testing</em> in the research literature on automated testing.
+
+</p><p>
+You may submit your program as many times as you like, and all submissions
+will be graded and cataloged.  We will use your highest-scoring submission,
+with ties broken in favor of the later submission.  If any group member is
+in EECS 498-002, your highest-scoring submission will be chosen using a
+(2/3,1/3) weighted average of your core and advanced scores.
+
+</p><p>
+You must recompile and <tt>git push</tt> at least once between submissions.
+
+</p><p>
+The auto-grader will provide feedback for the first submission of each day,
+plus 3 bonus submissions over the duration of this project.  Bonus
+submissions will be used automatically--any submission you make after the 
+first one of that day will use one of your bonus submissions.  After your 3
+bonus submissions are used up, the system will continue to provide feedback
+for the first submission of each day.  
+
+</p><p>
+Because you are writing concurrent programs, the auto-grader may return
+non-deterministic results.  In particular, test cases 30-44 are
+non-deterministic.
+
+</p><p>
+Because your programs will be auto-graded, you must be careful to follow the
+exact rules in the project description.  In particular:
+
+</p><ul>
+
+<li>Your thread library should not generate any output.  Only the program
+using your thread library should generate output.
+
+</li><li>Do not modify or rename the header files included in this handout.
+
+</li></ul>
+
+<p>
+In addition to the auto-grader's evaluation of your program's correctness, a
+human grader will evaluate your program on issues such as documentation,
+coding style, the efficiency, brevity, and understandability of your code,
+compiler warnings, etc..  Your final score will be the product of the
+hand-graded score (between 1-1.12) and the auto-grader score.
+
+</p><h2 id="submission">9. Turning in the project<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#submission" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h2>
+
+<p>
+<a href="https://grader4.eecs.umich.edu/eecs482/submit.php?2">Submit</a> the following files for your thread library:
+
+</p><ul>
+<li>C++ files for your thread library.  File names should end in
+<tt>.cc</tt>, <tt>.cpp</tt>, or <tt>.h</tt> and must not start with
+<tt>test</tt>.  Do not submit the files provided in this handout.
+
+</li><li>Suite of test cases.  Each test case should be in a single file.  File
+names should start with <tt>test</tt> and end with <tt>.cc</tt> or
+<tt>.cpp</tt>.
+
+</li></ul>
+
+<!--
+<p>
+Each person should also describe the contributions of each team member.
+using the following <a href="../peer.php?peer2">web form</a>.
+-->
+
+<p>
+The official time of submission for your project will be the time of
+your last submission. There is a strict deadline for full credit on
+the project: Midnight EDT on the day the project is due. Students who
+have obtained less than 80% at that point (on either the Core or
+Advanced portion) may continue working on that portion of the project
+for up to one week to improve their score on that portion to a maximum
+of 80%.
+
+</p><h2 id="files">10. Files included in this handout (<a href="https://grader4.eecs.umich.edu/eecs482/project2/handout.zip">zip file</a>)
+<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#files" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h2>
+
+<ul>
+<li><a href="https://grader4.eecs.umich.edu/eecs482/project2/cpu.h"><tt>cpu.h</tt></a>
+</li><li><a href="https://grader4.eecs.umich.edu/eecs482/project2/cv.h"><tt>cv.h</tt></a>
+</li><li><a href="https://grader4.eecs.umich.edu/eecs482/project2/libcpu.o"><tt>libcpu.o</tt></a>
+</li><li><a href="https://grader4.eecs.umich.edu/eecs482/project2/mutex.h"><tt>mutex.h</tt></a>
+</li><li><a href="https://grader4.eecs.umich.edu/eecs482/project2/thread.h"><tt>thread.h</tt></a>
+</li><li><a href="https://grader4.eecs.umich.edu/eecs482/project2/autotag.sh"><tt>autotag.sh</tt></a>
+</li><li><a href="https://grader4.eecs.umich.edu/eecs482/project2/Makefile"><tt>Makefile</tt></a>
+</li></ul>
+
+<h2 id="platforms">11. Experimental platforms<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="https://grader4.eecs.umich.edu/eecs482/project2/#platforms" style="font: 1em / 1 anchorjs-icons; padding-left: 0.375em;"></a></h2>
+
+<p>
+The files provided in this handout were compiled on RHEL 8.  They should
+work on most other Linux distributions (e.g., Ubuntu) and on Windows
+Subsystem for Linux (WSL), but these are not officially supported.
+
+</p><p>
+We also provide an experimental version of the infrastructure for students who
+want to develop on MacOS (11.0 or later, including experimental support for
+ARM-based Macs).
+<!--
+Note that <tt>getcontext</tt>,
+<tt>makecontext</tt>, <tt>setcontext</tt>, and <tt>swapcontext</tt> are
+deprecated on MacOS.
+and there's at least one bug in <tt>getcontext</tt>
+(see workaround below),
+-->
+If you are developing on MacOS:
+
+</p><ul>
+
+<li> Use <tt><a href="https://grader4.eecs.umich.edu/eecs482/project2/macos/libcpu_macos.o">libcpu_macos.o</a></tt> instead of
+<tt>libcpu.o</tt>.
+
+<!--
+(note the different suffix).
+-->
+
+</li><li> Add <tt>-D_XOPEN_SOURCE</tt> to the compilation flags.
+
+<!--
+<li> Add <tt>sizeof(_STRUCT_MCONTEXT)</tt> bytes of extra space after each
+<tt>ucontext</tt> struct.
+This (ugly) hack is meant to work around a bug
+in MacOS's implementation of <tt>getcontext</tt>.
+One way to do this is
+by allocating the <tt>ucontext</tt> within a larger struct.
+
+<pre>
+struct ucontext_with_extra_space {
+    ucontext_t ucontext;
+    char extra_space[sizeof(_STRUCT_MCONTEXT)];
+};
+</pre>
+-->
+
+<!--
+<li> If you run the project in a debugger, you'll need to ignore SIGUSR1
+signals by issuing the following debugger command:
+
+<pre>
+process handle SIGUSR1 -n false -p true -s false
+</pre>
+
+To issue this command automatically, add it to <tt>.lldbinit</tt> or create
+a symbolic breakpoint on <tt>main</tt> and give it a Debugger Command
+action that continues automatically after evaluating the actions box.
+-->
+
+</li></ul>
+
+
+<script src="./Project 2 -- thread library_files/primer_spec_plugin.min.js.download"></script>
+
+
+</div></body></html>

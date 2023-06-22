@@ -1,0 +1,5 @@
+thread A1 constr
+first join call
+in thread A
+after a join
+All CPUs suspended.  Exiting.

@@ -1,0 +1,5 @@
+thread A constr
+thread B constr
+AAquired Lock 1
+AAquired Lock 2
+All CPUs suspended.  Exiting.
